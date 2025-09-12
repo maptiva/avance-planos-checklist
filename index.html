@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ayuda Memoria de Agrimensura</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+
+    <div class="p-8 min-h-screen">
+        <!-- Client List View -->
+                <div id="client-list-view" class="flex flex-col items-center p-4 sm:p-8">
+            <h1 class="text-2xl font-bold mb-4 text-center">Mis Clientes</h1>
+                        <div id="client-list-container" class="w-full max-w-xl space-y-4 mt-6 p-2 rounded-lg max-h-[75vh] overflow-y-auto">
+                <!-- Client cards will be inserted here by JavaScript -->
+            </div>
+
+            <button id="add-client-btn" class="fixed bottom-6 right-6 bg-blue-500 text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center text-2xl">
+                +
+            </button>
+        </div>
+
+        <!-- Client Detail View (hidden by default) -->
+        <div id="client-detail-view" class="hidden mx-auto max-w-3xl">
+            <button id="back-btn" class="mb-4 text-blue-500">&larr; Volver</button>
+            <h2 id="client-name-title" class="text-2xl font-bold mb-4"></h2>
+
+            <!-- Mensura Card -->
+                        <div id="mensura-section" class="bg-white p-6 rounded-lg shadow-md mb-6">
+                <h3 class="text-xl font-bold mb-4">Plano de Mensura</h3>
+                
+                <div class="mb-6">
+                    <h4 class="text-lg font-semibold mb-3 text-gray-700 border-b pb-1">Carátula</h4>
+<div class="flex items-center border-t py-2">
+  <span class="text-gray-800">Dato Partida Inmobiliaria (PII)</span>
+  <div class="flex items-center space-x-4 flex-shrink-0 ml-auto">
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="dato-partida-inmobiliaria-pii-status" value="listo" class="peer/listo w-4 h-4 accent-green-500">
+      <span class="text-sm text-gray-500 peer-checked/listo:text-green-600 peer-checked/listo:font-semibold">Listo</span>
+    </label>
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="dato-partida-inmobiliaria-pii-status" value="na" class="peer/na w-4 h-4 accent-red-500">
+      <span class="text-sm text-gray-500 peer-checked/na:text-red-600 peer-checked/na:font-semibold">N/A</span>
+    </label>
+  </div>
+</div><div class="flex items-center border-t py-2">
+  <span class="text-gray-800">Objeto</span>
+  <div class="flex items-center space-x-4 flex-shrink-0 ml-auto">
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="objeto-status" value="listo" class="peer/listo w-4 h-4 accent-green-500">
+      <span class="text-sm text-gray-500 peer-checked/listo:text-green-600 peer-checked/listo:font-semibold">Listo</span>
+    </label>
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="objeto-status" value="na" class="peer/na w-4 h-4 accent-red-500">
+      <span class="text-sm text-gray-500 peer-checked/na:text-red-600 peer-checked/na:font-semibold">N/A</span>
+    </label>
+  </div>
+</div><div class="flex items-center border-t py-2">
+  <span class="text-gray-800">Propietario</span>
+  <div class="flex items-center space-x-4 flex-shrink-0 ml-auto">
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="propietario-status" value="listo" class="peer/listo w-4 h-4 accent-green-500">
+      <span class="text-sm text-gray-500 peer-checked/listo:text-green-600 peer-checked/listo:font-semibold">Listo</span>
+    </label>
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="propietario-status" value="na" class="peer/na w-4 h-4 accent-red-500">
+      <span class="text-sm text-gray-500 peer-checked/na:text-red-600 peer-checked/na:font-semibold">N/A</span>
+    </label>
+  </div>
+</div><div class="flex items-center border-t py-2">
+  <span class="text-gray-800">Inmueble</span>
+  <div class="flex items-center space-x-4 flex-shrink-0 ml-auto">
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="inmueble-status" value="listo" class="peer/listo w-4 h-4 accent-green-500">
+      <span class="text-sm text-gray-500 peer-checked/listo:text-green-600 peer-checked/listo:font-semibold">Listo</span>
+    </label>
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="inmueble-status" value="na" class="peer/na w-4 h-4 accent-red-500">
+      <span class="text-sm text-gray-500 peer-checked/na:text-red-600 peer-checked/na:font-semibold">N/A</span>
+    </label>
+  </div>
+</div><div class="flex items-center border-t py-2">
+  <span class="text-gray-800">Dominio</span>
+  <div class="flex items-center space-x-4 flex-shrink-0 ml-auto">
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="dominio-status" value="listo" class="peer/listo w-4 h-4 accent-green-500">
+      <span class="text-sm text-gray-500 peer-checked/listo:text-green-600 peer-checked/listo:font-semibold">Listo</span>
+    </label>
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="dominio-status" value="na" class="peer/na w-4 h-4 accent-red-500">
+      <span class="text-sm text-gray-500 peer-checked/na:text-red-600 peer-checked/na:font-semibold">N/A</span>
+    </label>
+  </div>
+</div><div class="flex items-center border-t py-2">
+  <span class="text-gray-800">Balance de Superficies</span>
+  <div class="flex items-center space-x-4 flex-shrink-0 ml-auto">
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="balance-de-superficies-status" value="listo" class="peer/listo w-4 h-4 accent-green-500">
+      <span class="text-sm text-gray-500 peer-checked/listo:text-green-600 peer-checked/listo:font-semibold">Listo</span>
+    </label>
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="balance-de-superficies-status" value="na" class="peer/na w-4 h-4 accent-red-500">
+      <span class="text-sm text-gray-500 peer-checked/na:text-red-600 peer-checked/na:font-semibold">N/A</span>
+    </label>
+  </div>
+</div><div class="flex items-center border-t py-2">
+  <span class="text-gray-800">Fecha</span>
+  <div class="flex items-center space-x-4 flex-shrink-0 ml-auto">
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="fecha-status" value="listo" class="peer/listo w-4 h-4 accent-green-500">
+      <span class="text-sm text-gray-500 peer-checked/listo:text-green-600 peer-checked/listo:font-semibold">Listo</span>
+    </label>
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="fecha-status" value="na" class="peer/na w-4 h-4 accent-red-500">
+      <span class="text-sm text-gray-500 peer-checked/na:text-red-600 peer-checked/na:font-semibold">N/A</span>
+    </label>
+  </div>
+</div><div class="flex items-center border-t py-2">
+  <span class="text-gray-800">Observaciones Generales</span>
+  <div class="flex items-center space-x-4 flex-shrink-0 ml-auto">
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="observaciones-generales-status" value="listo" class="peer/listo w-4 h-4 accent-green-500">
+      <span class="text-sm text-gray-500 peer-checked/listo:text-green-600 peer-checked/listo:font-semibold">Listo</span>
+    </label>
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="observaciones-generales-status" value="na" class="peer/na w-4 h-4 accent-red-500">
+      <span class="text-sm text-gray-500 peer-checked/na:text-red-600 peer-checked/na:font-semibold">N/A</span>
+    </label>
+  </div>
+</div><div class="flex items-center border-t py-2">
+  <span class="text-gray-800">Observaciones Específicas</span>
+  <div class="flex items-center space-x-4 flex-shrink-0 ml-auto">
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="observaciones-específicas-status" value="listo" class="peer/listo w-4 h-4 accent-green-500">
+      <span class="text-sm text-gray-500 peer-checked/listo:text-green-600 peer-checked/listo:font-semibold">Listo</span>
+    </label>
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="observaciones-específicas-status" value="na" class="peer/na w-4 h-4 accent-red-500">
+      <span class="text-sm text-gray-500 peer-checked/na:text-red-600 peer-checked/na:font-semibold">N/A</span>
+    </label>
+  </div>
+</div><div class="flex items-center border-t py-2">
+  <span class="text-gray-800">Declaratoria de Herederos</span>
+  <div class="flex items-center space-x-4 flex-shrink-0 ml-auto">
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="declaratoria-de-herederos-status" value="listo" class="peer/listo w-4 h-4 accent-green-500">
+      <span class="text-sm text-gray-500 peer-checked/listo:text-green-600 peer-checked/listo:font-semibold">Listo</span>
+    </label>
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="declaratoria-de-herederos-status" value="na" class="peer/na w-4 h-4 accent-red-500">
+      <span class="text-sm text-gray-500 peer-checked/na:text-red-600 peer-checked/na:font-semibold">N/A</span>
+    </label>
+  </div>
+</div><div class="flex items-center border-t py-2">
+  <span class="text-gray-800">Nomenclatura Catastral</span>
+  <div class="flex items-center space-x-4 flex-shrink-0 ml-auto">
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="nomenclatura-catastral-status" value="listo" class="peer/listo w-4 h-4 accent-green-500">
+      <span class="text-sm text-gray-500 peer-checked/listo:text-green-600 peer-checked/listo:font-semibold">Listo</span>
+    </label>
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="nomenclatura-catastral-status" value="na" class="peer/na w-4 h-4 accent-red-500">
+      <span class="text-sm text-gray-500 peer-checked/na:text-red-600 peer-checked/na:font-semibold">N/A</span>
+    </label>
+  </div>
+</div><div class="flex items-center border-t py-2">
+  <span class="text-gray-800">Nro de carpeta</span>
+  <div class="flex items-center space-x-4 flex-shrink-0 ml-auto">
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="nro-de-carpeta-status" value="listo" class="peer/listo w-4 h-4 accent-green-500">
+      <span class="text-sm text-gray-500 peer-checked/listo:text-green-600 peer-checked/listo:font-semibold">Listo</span>
+    </label>
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="nro-de-carpeta-status" value="na" class="peer/na w-4 h-4 accent-red-500">
+      <span class="text-sm text-gray-500 peer-checked/na:text-red-600 peer-checked/na:font-semibold">N/A</span>
+    </label>
+  </div>
+</div>
+                </div>
+
+                <div class="mb-6">
+                    <h4 class="text-lg font-semibold mb-3 text-gray-700 border-b pb-1">Dibujo</h4>
+<div class="flex items-center border-t py-2">
+  <span class="text-gray-800">Datos de linderos</span>
+  <div class="flex items-center space-x-4 flex-shrink-0 ml-auto">
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="datos-de-linderos-status" value="listo" class="peer/listo w-4 h-4 accent-green-500">
+      <span class="text-sm text-gray-500 peer-checked/listo:text-green-600 peer-checked/listo:font-semibold">Listo</span>
+    </label>
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="datos-de-linderos-status" value="na" class="peer/na w-4 h-4 accent-red-500">
+      <span class="text-sm text-gray-500 peer-checked/na:text-red-600 peer-checked/na:font-semibold">N/A</span>
+    </label>
+  </div>
+</div><div class="flex items-center border-t py-2">
+  <span class="text-gray-800">Norte</span>
+  <div class="flex items-center space-x-4 flex-shrink-0 ml-auto">
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="norte-status" value="listo" class="peer/listo w-4 h-4 accent-green-500">
+      <span class="text-sm text-gray-500 peer-checked/listo:text-green-600 peer-checked/listo:font-semibold">Listo</span>
+    </label>
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="norte-status" value="na" class="peer/na w-4 h-4 accent-red-500">
+      <span class="text-sm text-gray-500 peer-checked/na:text-red-600 peer-checked/na:font-semibold">N/A</span>
+    </label>
+  </div>
+</div><div class="flex items-center border-t py-2">
+  <span class="text-gray-800">Acotaciones calles</span>
+  <div class="flex items-center space-x-4 flex-shrink-0 ml-auto">
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="acotaciones-calles-status" value="listo" class="peer/listo w-4 h-4 accent-green-500">
+      <span class="text-sm text-gray-500 peer-checked/listo:text-green-600 peer-checked/listo:font-semibold">Listo</span>
+    </label>
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="acotaciones-calles-status" value="na" class="peer/na w-4 h-4 accent-red-500">
+      <span class="text-sm text-gray-500 peer-checked/na:text-red-600 peer-checked/na:font-semibold">N/A</span>
+    </label>
+  </div>
+</div><div class="flex items-center border-t py-2">
+  <span class="text-gray-800">Acotaciones a esquinas</span>
+  <div class="flex items-center space-x-4 flex-shrink-0 ml-auto">
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="acotaciones-a-esquinas-status" value="listo" class="peer/listo w-4 h-4 accent-green-500">
+      <span class="text-sm text-gray-500 peer-checked/listo:text-green-600 peer-checked/listo:font-semibold">Listo</span>
+    </label>
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="acotaciones-a-esquinas-status" value="na" class="peer/na w-4 h-4 accent-red-500">
+      <span class="text-sm text-gray-500 peer-checked/na:text-red-600 peer-checked/na:font-semibold">N/A</span>
+    </label>
+  </div>
+</div><div class="flex items-center border-t py-2">
+  <span class="text-gray-800">Acotaciones lote</span>
+  <div class="flex items-center space-x-4 flex-shrink-0 ml-auto">
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="acotaciones-lote-status" value="listo" class="peer/listo w-4 h-4 accent-green-500">
+      <span class="text-sm text-gray-500 peer-checked/listo:text-green-600 peer-checked/listo:font-semibold">Listo</span>
+    </label>
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="acotaciones-lote-status" value="na" class="peer/na w-4 h-4 accent-red-500">
+      <span class="text-sm text-gray-500 peer-checked/na:text-red-600 peer-checked/na:font-semibold">N/A</span>
+    </label>
+  </div>
+</div><div class="flex items-center border-t py-2">
+  <span class="text-gray-800">Acotaciones ángulos</span>
+  <div class="flex items-center space-x-4 flex-shrink-0 ml-auto">
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="acotaciones-ángulos-status" value="listo" class="peer/listo w-4 h-4 accent-green-500">
+      <span class="text-sm text-gray-500 peer-checked/listo:text-green-600 peer-checked/listo:font-semibold">Listo</span>
+    </label>
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="acotaciones-ángulos-status" value="na" class="peer/na w-4 h-4 accent-red-500">
+      <span class="text-sm text-gray-500 peer-checked/na:text-red-600 peer-checked/na:font-semibold">N/A</span>
+    </label>
+  </div>
+</div><div class="flex items-center border-t py-2">
+  <span class="text-gray-800">Notas</span>
+  <div class="flex items-center space-x-4 flex-shrink-0 ml-auto">
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="notas-status" value="listo" class="peer/listo w-4 h-4 accent-green-500">
+      <span class="text-sm text-gray-500 peer-checked/listo:text-green-600 peer-checked/listo:font-semibold">Listo</span>
+    </label>
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="notas-status" value="na" class="peer/na w-4 h-4 accent-red-500">
+      <span class="text-sm text-gray-500 peer-checked/na:text-red-600 peer-checked/na:font-semibold">N/A</span>
+    </label>
+  </div>
+</div><div class="flex items-center border-t py-2">
+  <span class="text-gray-800">Letras vértices</span>
+  <div class="flex items-center space-x-4 flex-shrink-0 ml-auto">
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="letras-vértices-status" value="listo" class="peer/listo w-4 h-4 accent-green-500">
+      <span class="text-sm text-gray-500 peer-checked/listo:text-green-600 peer-checked/listo:font-semibold">Listo</span>
+    </label>
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="letras-vértices-status" value="na" class="peer/na w-4 h-4 accent-red-500">
+      <span class="text-sm text-gray-500 peer-checked/na:text-red-600 peer-checked/na:font-semibold">N/A</span>
+    </label>
+  </div>
+</div><div class="flex items-center border-t py-2">
+  <span class="text-gray-800">Referencias</span>
+  <div class="flex items-center space-x-4 flex-shrink-0 ml-auto">
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="referencias-status" value="listo" class="peer/listo w-4 h-4 accent-green-500">
+      <span class="text-sm text-gray-500 peer-checked/listo:text-green-600 peer-checked/listo:font-semibold">Listo</span>
+    </label>
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="referencias-status" value="na" class="peer/na w-4 h-4 accent-red-500">
+      <span class="text-sm text-gray-500 peer-checked/na:text-red-600 peer-checked/na:font-semibold">N/A</span>
+    </label>
+  </div>
+</div><div class="flex items-center border-t py-2">
+  <span class="text-gray-800">Nombre de lote</span>
+  <div class="flex items-center space-x-4 flex-shrink-0 ml-auto">
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="nombre-de-lote-status" value="listo" class="peer/listo w-4 h-4 accent-green-500">
+      <span class="text-sm text-gray-500 peer-checked/listo:text-green-600 peer-checked/listo:font-semibold">Listo</span>
+    </label>
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="nombre-de-lote-status" value="na" class="peer/na w-4 h-4 accent-red-500">
+      <span class="text-sm text-gray-500 peer-checked/na:text-red-600 peer-checked/na:font-semibold">N/A</span>
+    </label>
+  </div>
+</div><div class="flex items-center border-t py-2">
+  <span class="text-gray-800">Materialización de esquinas</span>
+  <div class="flex items-center space-x-4 flex-shrink-0 ml-auto">
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="materialización-de-esquinas-status" value="listo" class="peer/listo w-4 h-4 accent-green-500">
+      <span class="text-sm text-gray-500 peer-checked/listo:text-green-600 peer-checked/listo:font-semibold">Listo</span>
+    </label>
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="materialización-de-esquinas-status" value="na" class="peer/na w-4 h-4 accent-red-500">
+      <span class="text-sm text-gray-500 peer-checked/na:text-red-600 peer-checked/na:font-semibold">N/A</span>
+    </label>
+  </div>
+</div><div class="flex items-center border-t py-2">
+  <span class="text-gray-800">Descripción Título</span>
+  <div class="flex items-center space-x-4 flex-shrink-0 ml-auto">
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="descripción-título-status" value="listo" class="peer/listo w-4 h-4 accent-green-500">
+      <span class="text-sm text-gray-500 peer-checked/listo:text-green-600 peer-checked/listo:font-semibold">Listo</span>
+    </label>
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="descripción-título-status" value="na" class="peer/na w-4 h-4 accent-red-500">
+      <span class="text-sm text-gray-500 peer-checked/na:text-red-600 peer-checked/na:font-semibold">N/A</span>
+    </label>
+  </div>
+</div>
+                </div>
+            </div>
+
+            <div id="foja-mejoras-section" class="bg-white p-6 rounded-lg shadow-md mb-6">
+                <h3 class="text-xl font-bold mb-4">Foja de Mejoras</h3>
+<div class="flex items-center border-t py-2">
+  <span class="text-gray-800">Dato Partida Inmobiliaria (PII)</span>
+  <div class="flex items-center space-x-4 flex-shrink-0 ml-auto">
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="dato-partida-inmobiliaria-pii-status" value="listo" class="peer/listo w-4 h-4 accent-green-500">
+      <span class="text-sm text-gray-500 peer-checked/listo:text-green-600 peer-checked/listo:font-semibold">Listo</span>
+    </label>
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="dato-partida-inmobiliaria-pii-status" value="na" class="peer/na w-4 h-4 accent-red-500">
+      <span class="text-sm text-gray-500 peer-checked/na:text-red-600 peer-checked/na:font-semibold">N/A</span>
+    </label>
+  </div>
+</div><div class="flex items-center border-t py-2">
+  <span class="text-gray-800">Propietario</span>
+  <div class="flex items-center space-x-4 flex-shrink-0 ml-auto">
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="propietario-status" value="listo" class="peer/listo w-4 h-4 accent-green-500">
+      <span class="text-sm text-gray-500 peer-checked/listo:text-green-600 peer-checked/listo:font-semibold">Listo</span>
+    </label>
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="propietario-status" value="na" class="peer/na w-4 h-4 accent-red-500">
+      <span class="text-sm text-gray-500 peer-checked/na:text-red-600 peer-checked/na:font-semibold">N/A</span>
+    </label>
+  </div>
+</div><div class="flex items-center border-t py-2">
+  <span class="text-gray-800">Foto frente y dirección</span>
+  <div class="flex items-center space-x-4 flex-shrink-0 ml-auto">
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="foto-frente-y-dirección-status" value="listo" class="peer/listo w-4 h-4 accent-green-500">
+      <span class="text-sm text-gray-500 peer-checked/listo:text-green-600 peer-checked/listo:font-semibold">Listo</span>
+    </label>
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="foto-frente-y-dirección-status" value="na" class="peer/na w-4 h-4 accent-red-500">
+      <span class="text-sm text-gray-500 peer-checked/na:text-red-600 peer-checked/na:font-semibold">N/A</span>
+    </label>
+  </div>
+</div><div class="flex items-center border-t py-2">
+  <span class="text-gray-800">Referencias</span>
+  <div class="flex items-center space-x-4 flex-shrink-0 ml-auto">
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="referencias-status" value="listo" class="peer/listo w-4 h-4 accent-green-500">
+      <span class="text-sm text-gray-500 peer-checked/listo:text-green-600 peer-checked/listo:font-semibold">Listo</span>
+    </label>
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="referencias-status" value="na" class="peer/na w-4 h-4 accent-red-500">
+      <span class="text-sm text-gray-500 peer-checked/na:text-red-600 peer-checked/na:font-semibold">N/A</span>
+    </label>
+  </div>
+</div><div class="flex items-center border-t py-2">
+  <span class="text-gray-800">Norte</span>
+  <div class="flex items-center space-x-4 flex-shrink-0 ml-auto">
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="norte-status" value="listo" class="peer/listo w-4 h-4 accent-green-500">
+      <span class="text-sm text-gray-500 peer-checked/listo:text-green-600 peer-checked/listo:font-semibold">Listo</span>
+    </label>
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="norte-status" value="na" class="peer/na w-4 h-4 accent-red-500">
+      <span class="text-sm text-gray-500 peer-checked/na:text-red-600 peer-checked/na:font-semibold">N/A</span>
+    </label>
+  </div>
+</div><div class="flex items-center border-t py-2">
+  <span class="text-gray-800">Calle</span>
+  <div class="flex items-center space-x-4 flex-shrink-0 ml-auto">
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="calle-status" value="listo" class="peer/listo w-4 h-4 accent-green-500">
+      <span class="text-sm text-gray-500 peer-checked/listo:text-green-600 peer-checked/listo:font-semibold">Listo</span>
+    </label>
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="calle-status" value="na" class="peer/na w-4 h-4 accent-red-500">
+      <span class="text-sm text-gray-500 peer-checked/na:text-red-600 peer-checked/na:font-semibold">N/A</span>
+    </label>
+  </div>
+</div><div class="flex items-center border-t py-2">
+  <span class="text-gray-800">Vértices</span>
+  <div class="flex items-center space-x-4 flex-shrink-0 ml-auto">
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="vértices-status" value="listo" class="peer/listo w-4 h-4 accent-green-500">
+      <span class="text-sm text-gray-500 peer-checked/listo:text-green-600 peer-checked/listo:font-semibold">Listo</span>
+    </label>
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="vértices-status" value="na" class="peer/na w-4 h-4 accent-red-500">
+      <span class="text-sm text-gray-500 peer-checked/na:text-red-600 peer-checked/na:font-semibold">N/A</span>
+    </label>
+  </div>
+</div><div class="flex items-center border-t py-2">
+  <span class="text-gray-800">Denominación lotes</span>
+  <div class="flex items-center space-x-4 flex-shrink-0 ml-auto">
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="denominación-lotes-status" value="listo" class="peer/listo w-4 h-4 accent-green-500">
+      <span class="text-sm text-gray-500 peer-checked/listo:text-green-600 peer-checked/listo:font-semibold">Listo</span>
+    </label>
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="denominación-lotes-status" value="na" class="peer/na w-4 h-4 accent-red-500">
+      <span class="text-sm text-gray-500 peer-checked/na:text-red-600 peer-checked/na:font-semibold">N/A</span>
+    </label>
+  </div>
+</div><div class="flex items-center border-t py-2">
+  <span class="text-gray-800">Límite s/m</span>
+  <div class="flex items-center space-x-4 flex-shrink-0 ml-auto">
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="límite-sm-status" value="listo" class="peer/listo w-4 h-4 accent-green-500">
+      <span class="text-sm text-gray-500 peer-checked/listo:text-green-600 peer-checked/listo:font-semibold">Listo</span>
+    </label>
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="límite-sm-status" value="na" class="peer/na w-4 h-4 accent-red-500">
+      <span class="text-sm text-gray-500 peer-checked/na:text-red-600 peer-checked/na:font-semibold">N/A</span>
+    </label>
+  </div>
+</div><div class="flex items-center border-t py-2">
+  <span class="text-gray-800">Denominación polígonos</span>
+  <div class="flex items-center space-x-4 flex-shrink-0 ml-auto">
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="denominación-polígonos-status" value="listo" class="peer/listo w-4 h-4 accent-green-500">
+      <span class="text-sm text-gray-500 peer-checked/listo:text-green-600 peer-checked/listo:font-semibold">Listo</span>
+    </label>
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="denominación-polígonos-status" value="na" class="peer/na w-4 h-4 accent-red-500">
+      <span class="text-sm text-gray-500 peer-checked/na:text-red-600 peer-checked/na:font-semibold">N/A</span>
+    </label>
+  </div>
+</div><div class="flex items-center border-t py-2">
+  <span class="text-gray-800">Escala</span>
+  <div class="flex items-center space-x-4 flex-shrink-0 ml-auto">
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="escala-status" value="listo" class="peer/listo w-4 h-4 accent-green-500">
+      <span class="text-sm text-gray-500 peer-checked/listo:text-green-600 peer-checked/listo:font-semibold">Listo</span>
+    </label>
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="escala-status" value="na" class="peer/na w-4 h-4 accent-red-500">
+      <span class="text-sm text-gray-500 peer-checked/na:text-red-600 peer-checked/na:font-semibold">N/A</span>
+    </label>
+  </div>
+</div><div class="flex items-center border-t py-2">
+  <span class="text-gray-800">Planilla de superficies</span>
+  <div class="flex items-center space-x-4 flex-shrink-0 ml-auto">
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="planilla-de-superficies-status" value="listo" class="peer/listo w-4 h-4 accent-green-500">
+      <span class="text-sm text-gray-500 peer-checked/listo:text-green-600 peer-checked/listo:font-semibold">Listo</span>
+    </label>
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="planilla-de-superficies-status" value="na" class="peer/na w-4 h-4 accent-red-500">
+      <span class="text-sm text-gray-500 peer-checked/na:text-red-600 peer-checked/na:font-semibold">N/A</span>
+    </label>
+  </div>
+</div><div class="flex items-center border-t py-2">
+  <span class="text-gray-800">Comparación de superficies</span>
+  <div class="flex items-center space-x-4 flex-shrink-0 ml-auto">
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="comparación-de-superficies-status" value="listo" class="peer/listo w-4 h-4 accent-green-500">
+      <span class="text-sm text-gray-500 peer-checked/listo:text-green-600 peer-checked/listo:font-semibold">Listo</span>
+    </label>
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="comparación-de-superficies-status" value="na" class="peer/na w-4 h-4 accent-red-500">
+      <span class="text-sm text-gray-500 peer-checked/na:text-red-600 peer-checked/na:font-semibold">N/A</span>
+    </label>
+  </div>
+</div><div class="flex items-center border-t py-2">
+  <span class="text-gray-800">Fecha</span>
+  <div class="flex items-center space-x-4 flex-shrink-0 ml-auto">
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="fecha-status" value="listo" class="peer/listo w-4 h-4 accent-green-500">
+      <span class="text-sm text-gray-500 peer-checked/listo:text-green-600 peer-checked/listo:font-semibold">Listo</span>
+    </label>
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="fecha-status" value="na" class="peer/na w-4 h-4 accent-red-500">
+      <span class="text-sm text-gray-500 peer-checked/na:text-red-600 peer-checked/na:font-semibold">N/A</span>
+    </label>
+  </div>
+</div><div class="flex items-center border-t py-2">
+  <span class="text-gray-800">Nro de carpeta</span>
+  <div class="flex items-center space-x-4 flex-shrink-0 ml-auto">
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="nro-de-carpeta-status" value="listo" class="peer/listo w-4 h-4 accent-green-500">
+      <span class="text-sm text-gray-500 peer-checked/listo:text-green-600 peer-checked/listo:font-semibold">Listo</span>
+    </label>
+    <label class="flex items-center space-x-1.5 cursor-pointer">
+      <input type="radio" name="nro-de-carpeta-status" value="na" class="peer/na w-4 h-4 accent-red-500">
+      <span class="text-sm text-gray-500 peer-checked/na:text-red-600 peer-checked/na:font-semibold">N/A</span>
+    </label>
+  </div>
+</div>
+            </div>
+
+            <!-- Observaciones Card -->
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h3 class="text-xl font-bold mb-4">3. Observaciones</h3>
+                <textarea id="observations-textarea" rows="4" class="w-full p-2 border rounded" placeholder="Añadir observaciones..."></textarea>
+            </div>
+
+        </div>
+    </div>
+
+    <script type="module" src="./main.js"></script>
+</body>
+</html>

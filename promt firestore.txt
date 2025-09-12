@@ -1,0 +1,108 @@
+'
+This is the final functionality update for the `main.js` file. It will enable saving the status of checklist items to Firestore and will also load the saved status when viewing a client.
+
+1.  First, update the Firestore import statement at the top of the file to include all necessary functions: `doc`, `getDoc`, `updateDoc`, and `deleteField`.
+    ```javascript
+    import { getFirestore, collection, onSnapshot, addDoc, serverTimestamp, doc, getDoc, updateDoc, deleteField } from "https://www.gstatic.com/firebasejs/9.6.7/firebase-firestore.js";
+    ```
+
+2.  Next, modify the `loadClientDetails` function. The part that populates the checkboxes is outdated. We need to replace it with code that works with our new radio buttons.
+    Inside the `if (docSnap.exists())` block, find and delete the entire `allCheckboxes.forEach(...)` loop.
+    In its place, add this new code:
+    ```javascript
+    const allRadioGroups = clientDetailView.querySelectorAll("input[type=radio][name]");
+    const uniqueNames = [...new Set(Array.from(allRadioGroups).map(r => r.name))];
+
+    uniqueNames.forEach(name => {
+        const radios = clientDetailView.querySelectorAll(`input[name="${name}"]`);
+        const key = name.replace("-status", "");
+        const sectionContainer = radios.closest("div.bg-white");
+        const section = sectionContainer.id.includes("mensura") ? "mensura" : "fojaMejoras";
+        
+        let savedState = null;
+        if (section === "mensura" && clientData.mensura) {
+            savedState = clientData.mensura[key];
+        } else if (section === "fojaMejoras" && clientData.fojaMejoras) {
+            savedState = clientData.fojaMejoras[key];
+        }
+
+        radios.forEach(radio => {
+            radio.checked = (radio.value === savedState);
+        });
+    });
+    ```
+
+3.  Finally, add the main event listener that saves the data. This listener will handle all clicks on radio buttons within the detail view. Place this code at the very bottom of the file:
+    ```javascript
+    clientDetailView.addEventListener("click", async (event) => {
+        const target = event.target;
+        if (target.type !== "radio") return;
+        
+        const wasChecked = target.getAttribute("data-was-checked") === "true";
+        
+        document.querySelectorAll(`input[name="${target.name}"]`).forEach(radio => {
+            radio.removeAttribute("data-was-checked");
+        });
+
+        const key = target.name.replace("-status", "");
+        const sectionContainer = target.closest("div.bg-white");
+        const section = sectionContainer.id.includes("mensura") ? "mensura" : "fojaMejoras";
+        const docRef = doc(db, "clientes", currentClientId);
+
+        if (wasChecked) {
+            target.checked = false;
+            try {
+                await updateDoc(docRef, {
+                    [`${section}.${key}`]: deleteField()
+                });
+            } catch (e) {
+                console.error("Error removing field: ", e);
+            }
+        } else {
+            target.setAttribute("data-was-checked", "true");
+            try {
+                await updateDoc(docRef, {
+                    [`${section}.${key}`]: target.value
+                });
+            } catch (e) {
+                console.error("Error updating field: ", e);
+            }
+        }
+    });
+    '
+
+
+PROMPT OBSERVACIONES
+
+'
+Let\'s implement the final feature: automatic saving for the "Observaciones" text area using a debounce technique.
+
+Please update the `main.js` file with the following additions:
+
+1.  At the top of the file, right below the `let currentClientId = null;` line, add a variable for our debounce timer:
+    ```javascript
+    let debounceTimer;
+    ```
+
+2.  At the very bottom of the file, add a new event listener for the `observationsTextarea` element. This listener will trigger on the `input` event and contain the debounce logic.
+    ```javascript
+    observationsTextarea.addEventListener("input", () => {
+        // Clear the previous timer to reset the debounce period
+        clearTimeout(debounceTimer);
+
+        // Set a new timer
+        debounceTimer = setTimeout(async () => {
+            if (currentClientId) {
+                const docRef = doc(db, "clientes", currentClientId);
+                try {
+                    await updateDoc(docRef, {
+                        observaciones: observationsTextarea.value
+                    });
+                    console.log("Observaciones guardadas.");
+                } catch (e) {
+                    console.error("Error al guardar observaciones: ", e);
+                }
+            }
+        }, 1500); // Wait 1.5 seconds after the user stops typing
+    });
+    '
