@@ -1,6 +1,6 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.7/firebase-app.js";
-import { getFirestore, collection, onSnapshot, addDoc, serverTimestamp, doc, getDoc, updateDoc, deleteField } from "https://www.gstatic.com/firebasejs/9.6.7/firebase-firestore.js";
+import { getFirestore, collection, onSnapshot, addDoc, serverTimestamp, doc, getDoc, updateDoc, deleteField, deleteDoc } from "https://www.gstatic.com/firebasejs/9.6.7/firebase-firestore.js";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -25,7 +25,11 @@ const clientDetailView = document.getElementById("client-detail-view");
 const backBtn = document.getElementById("back-btn");
 const clientNameTitle = document.getElementById("client-name-title");
 const observationsTextarea = document.getElementById("observations-textarea");
+const addClientBtn = document.getElementById('add-client-btn');
 
+function sanitizeKey(key) {
+  return key.toLowerCase().replace(/[^a-z0-9_-]/g, '_');
+}
 
 // Listen for real-time updates on the 'clientes' collection
 onSnapshot(collection(db, 'clientes'), (snapshot) => {
@@ -38,60 +42,94 @@ onSnapshot(collection(db, 'clientes'), (snapshot) => {
   }
   // Create and append a card for each client
   snapshot.forEach(doc => {
-    const client = doc.data();
-    const clientCard = document.createElement('div');
-    clientCard.className = "bg-white p-4 rounded-lg shadow-md cursor-pointer hover:bg-gray-50 w-full";
-    clientCard.textContent = client.nombre;
-    // Store the client's ID in a data attribute for later use
-    clientCard.dataset.id = doc.id;
-    clientListContainer.appendChild(clientCard);
-  });
+          const client = doc.data();
+          const clientCard = document.createElement("div");
+          clientCard.className = "bg-white p-4 rounded-lg shadow-md w-full flex justify-between items-center";
+                    
+          const clientNameSpan = document.createElement("span");
+          clientNameSpan.className = "cursor-pointer flex-grow";
+          clientNameSpan.textContent = client.nombre;
+          clientNameSpan.dataset.id = doc.id; // The name is the main clickable area
+                    
+          const deleteBtn = document.createElement("button");
+          deleteBtn.className = "delete-client-btn ml-4 p-1 rounded-full hover:bg-red-100";
+          deleteBtn.dataset.id = doc.id; // The button also needs the id
+          deleteBtn.dataset.name = client.nombre; // Store name for confirmation message
+          deleteBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" /></svg>`; // Trash can icon
+
+          clientCard.appendChild(clientNameSpan);
+          clientCard.appendChild(deleteBtn);
+          clientListContainer.appendChild(clientCard);
+      });
 });
 
 async function loadClientDetails(clientId) {
-  const docRef = doc(db, "clientes", clientId);
-  const docSnap = await getDoc(docRef);
-  if (docSnap.exists()) {
-    const clientData = docSnap.data();
-    // Populate the UI
-    clientNameTitle.textContent = clientData.nombre || "Cliente sin nombre";
-    observationsTextarea.value = clientData.observaciones || "";
-    
-    const allRadioGroups = clientDetailView.querySelectorAll("input[type=radio][name]");
-    const uniqueNames = [...new Set(Array.from(allRadioGroups).map(r => r.name))];
+        const docRef = doc(db, "clientes", clientId);
+        const docSnap = await getDoc(docRef);
 
-    uniqueNames.forEach(name => {
-        const radios = clientDetailView.querySelectorAll(`input[name="${name}"]`);
-        const key = name.replace("-status", "");
-        const sectionContainer = radios[0].closest("div.bg-white");
-        const section = sectionContainer.id.includes("mensura") ? "mensura" : "fojaMejoras";
-        
-        let savedState = null;
-        if (section === "mensura" && clientData.mensura) {
-            savedState = clientData.mensura[key];
-        } else if (section === "fojaMejoras" && clientData.fojaMejoras) {
-            savedState = clientData.fojaMejoras[key];
+        if (docSnap.exists()) {
+            const clientData = docSnap.data();
+            
+            clientNameTitle.textContent = clientData.nombre || "Cliente sin nombre";
+            observationsTextarea.value = clientData.observaciones || "";
+
+            // New, robust logic for populating radio buttons
+            const allRadioButtons = clientDetailView.querySelectorAll("input[type=radio]");
+            allRadioButtons.forEach(radio => {
+                const sectionContainer = radio.closest('[id$="-section"]');
+                if (!sectionContainer) return;
+
+                const section = sectionContainer.id.replace("-section", "");
+                const key = radio.name.replace("-status", "");
+                const sanitizedKey = sanitizeKey(key);
+                
+                let savedState = null;
+                if (clientData[section] && clientData[section][sanitizedKey]) {
+                    savedState = clientData[section][sanitizedKey];
+                }
+                
+                radio.checked = (radio.value === savedState);
+                
+                // This ensures the un-check logic works correctly on first load
+                if (radio.checked) {
+                    radio.setAttribute("data-was-checked", "true");
+                } else {
+                    radio.removeAttribute("data-was-checked");
+                }
+            });
+
+        } else {
+            console.log("El documento del cliente no fue encontrado.");
+            alert("Error: No se pudieron cargar los datos del cliente.");
+            backBtn.click();
         }
+    }
 
-        radios.forEach(radio => {
-            radio.checked = (radio.value === savedState);
-        });
-    });
+clientListContainer.addEventListener("click", async (event) => {
+  const target = event.target;
+  const deleteButton = target.closest(".delete-client-btn");
 
-  } else {
-    console.log("El documento del cliente no fue encontrado.");
-    alert("Error: No se pudieron cargar los datos del cliente.");
-    // Go back to the list if client data not found
-    backBtn.click();
+  if (deleteButton) {
+    const clientId = deleteButton.dataset.id;
+    const clientName = deleteButton.dataset.name;
+    if (confirm(`¿Estás seguro de que quieres eliminar a "${clientName}"? Esta acción no se puede deshacer.`)) {
+      try {
+        await deleteDoc(doc(db, "clientes", clientId));
+        console.log("Cliente eliminado con éxito.");
+      } catch (e) {
+        console.error("Error al eliminar el cliente: ", e);
+        alert("Hubo un error al eliminar el cliente.");
+      }
+    }
+    return; // Explicitly stop after handling delete
   }
-}
 
-clientListContainer.addEventListener("click", (event) => {
-  const clickedCard = event.target.closest("[data-id]");
+  const clickedCard = target.closest("[data-id]");
   if (clickedCard) {
+    // This part should not run if the delete button was clicked.
+    // The `return` above handles this.
     currentClientId = clickedCard.dataset.id;
-    loadClientDetails(currentClientId); // Load the data
-    // Switch views
+    loadClientDetails(currentClientId);
     clientListView.classList.add("hidden");
     clientDetailView.classList.remove("hidden");
   }
@@ -102,48 +140,44 @@ backBtn.addEventListener("click", () => {
   clientListView.classList.remove("hidden");
 });
 
-clientDetailView.addEventListener('mousedown', (e) => {
-    if (e.target.type === 'radio') {
-        e.target.setAttribute('data-was-checked', e.target.checked);
-    }
-});
-
 clientDetailView.addEventListener("click", async (event) => {
-    const target = event.target;
-    if (target.type !== "radio") return;
-    
-    const wasChecked = target.getAttribute("data-was-checked") === "true";
-    
-    // This is a new radio button click, not a toggle-off
-    document.querySelectorAll(`input[name="${target.name}"]`).forEach(radio => {
-        radio.removeAttribute("data-was-checked");
+        const target = event.target;
+        if (target.type !== "radio") return;
+
+        const sectionContainer = target.closest('[id$="-section"]');
+        if (!sectionContainer) return;
+        
+        const wasChecked = target.getAttribute("data-was-checked") === "true";
+        
+        document.querySelectorAll(`input[name="${target.name}"]`).forEach(radio => {
+            radio.removeAttribute("data-was-checked");
+        });
+
+        const section = sectionContainer.id.replace("-section", "");
+        const key = target.name.replace("-status", "");
+        const sanitizedKey = sanitizeKey(key);
+        const docRef = doc(db, "clientes", currentClientId);
+
+        if (wasChecked) {
+            target.checked = false;
+            try {
+                await updateDoc(docRef, {
+                    [`${section}.${sanitizedKey}`]: deleteField()
+                });
+            } catch (e) {
+                console.error("Error removing field: ", e);
+            }
+        } else {
+            target.setAttribute("data-was-checked", "true");
+            try {
+                await updateDoc(docRef, {
+                    [`${section}.${sanitizedKey}`]: target.value
+                });
+            } catch (e) {
+                console.error("Error updating field: ", e);
+            }
+        }
     });
-
-    const key = target.name.replace("-status", "");
-    const sectionContainer = target.closest("div.bg-white");
-    const section = sectionContainer.id.includes("mensura") ? "mensura" : "fojaMejoras";
-    const docRef = doc(db, "clientes", currentClientId);
-
-    if (wasChecked) {
-        target.checked = false;
-        try {
-            await updateDoc(docRef, {
-                [`${section}.${key}`]: deleteField()
-            });
-        } catch (e) {
-            console.error("Error removing field: ", e);
-        }
-    } else {
-        target.setAttribute("data-was-checked", "true");
-        try {
-            await updateDoc(docRef, {
-                [`${section}.${key}`]: target.value
-            });
-        } catch (e) {
-            console.error("Error updating field: ", e);
-        }
-    }
-});
 
 observationsTextarea.addEventListener("input", () => {
     clearTimeout(debounceTimer);
@@ -161,3 +195,84 @@ observationsTextarea.addEventListener("input", () => {
         }
     }, 1500);
 });
+
+addClientBtn.addEventListener('click', async () => {
+  const clientName = prompt('Ingrese el nombre del nuevo cliente:');
+  if (clientName && clientName.trim() !== '') {
+    try {
+      await addDoc(collection(db, 'clientes'), {
+        nombre: clientName.trim(),
+        createdAt: serverTimestamp()
+      });
+      console.log('Cliente agregado con éxito.');
+    } catch (e) {
+      console.error('Error al agregar el cliente: ', e);
+      alert('Hubo un error al agregar el cliente.');
+    }
+  }
+});
+
+/*
+// --- SCRIPT DE MIGRACIÓN DE DATOS ---
+// Este script se puede ejecutar en la consola del navegador o en un entorno Node.js
+// para migrar las claves existentes en Firestore a su versión sanitizada.
+// Asegúrate de tener Firebase inicializado y el usuario autenticado si es necesario.
+
+import { getFirestore, collection, getDocs, writeBatch, doc, deleteField } from "https://www.gstatic.com/firebasejs/9.6.7/firebase-firestore.js";
+
+const db = getFirestore();
+
+function sanitizeKey(key) {
+  return key.toLowerCase().replace(/[^a-z0-9_-]/g, '_');
+}
+
+async function migrateData() {
+  const clientesRef = collection(db, "clientes");
+  const snapshot = await getDocs(clientesRef);
+  const batch = writeBatch(db);
+
+  snapshot.forEach(docSnap => {
+    const clientData = docSnap.data();
+    const docRef = docSnap.ref;
+    let needsUpdate = false;
+    const updates = {};
+
+    ['mensura', 'fojaMejoras'].forEach(section => {
+      if (clientData[section]) {
+        const sectionData = clientData[section];
+        
+        for (const key in sectionData) {
+          const sanitizedKey = sanitizeKey(key);
+          if (key !== sanitizedKey) {
+            needsUpdate = true;
+            // Preserve the value, just change the key
+            updates[`${section}.${sanitizedKey}`] = sectionData[key];
+            // Mark old key for deletion
+            updates[`${section}.${key}`] = deleteField();
+          }
+        }
+      }
+    });
+
+    if (needsUpdate) {
+      console.log(`Migrando documento: ${docSnap.id}`);
+      batch.update(docRef, updates);
+    }
+  });
+
+  if (batch._mutations.length > 0) {
+    try {
+      await batch.commit();
+      console.log("¡Migración completada con éxito!");
+    } catch (error) {
+      console.error("Error durante la migración: ", error);
+    }
+  } else {
+    console.log("No se encontraron documentos para migrar.");
+  }
+}
+
+// Para ejecutar la migración, descomenta la siguiente línea y ejecútala en la consola del navegador
+// con la página de tu aplicación abierta.
+// migrateData();
+*/
