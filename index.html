@@ -7,37 +7,48 @@
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100">
-
-    <div class="p-8 min-h-screen">
-        <!-- Client List View -->
-                <div id="client-list-view" class="flex flex-col items-center p-4 sm:p-8">
-            <h1 class="text-2xl font-bold mb-4 text-center">Revisión Trabajo Planos</h1>
-                        <div id="client-list-container" class="w-full max-w-xl space-y-4 mt-6 rounded-lg max-h-[75vh] overflow-y-auto">
-                <!-- Client cards will be inserted here by JavaScript -->
-            </div><div class="mt-6 w-full max-w-xl">
-        <button id="add-client-btn" class="w-full bg-blue-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
-          + Agregar Nuevo Cliente
-        </button>
-      </div>
+    <!-- NAVEGACIÓN PRINCIPAL POR PESTAÑAS -->
+    <nav class="bg-white shadow-md">
+        <div class="max-w-4xl mx-auto px-4">
+            <div class="flex justify-start space-x-4">
+                <button id="tab-clientes" class="py-4 px-2 text-blue-500 border-b-4 border-blue-500 font-semibold">Clientes</button>
+                <button id="tab-notas" class="py-4 px-2 text-gray-500 font-semibold hover:text-blue-500">Notas Generales</button>
+            </div>
         </div>
+    </nav>
 
-        <!-- Client Detail View (hidden by default) -->
-        <div id="client-detail-view" class="hidden mx-auto max-w-3xl">
-            <button id="back-btn" class="mb-4 text-blue-500">&larr; Volver</button>
-            <h2 id="client-name-title" class="text-2xl font-bold mb-4"></h2>
+    <!-- CONTENEDOR PRINCIPAL PARA LA VISTA DE CLIENTES -->
+    <div id="clientes-view">
+        <div class="p-8 min-h-screen">
+            <!-- Client List View -->
+                    <div id="client-list-view" class="flex flex-col items-center p-4 sm:p-8">
+                <h1 class="text-2xl font-bold mb-4 text-center">Revisión Trabajo Planos</h1>
+                            <div id="client-list-container" class="w-full max-w-xl space-y-4 mt-6 rounded-lg max-h-[75vh] overflow-y-auto">
+                    <!-- Client cards will be inserted here by JavaScript -->
+                </div><div class="mt-6 w-full max-w-xl">
+            <button id="add-client-btn" class="w-full bg-blue-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
+              + Agregar Nuevo Cliente
+            </button>
+          </div>
+            </div>
 
-            <!-- Mensura Card -->
-                        <div id="mensura-section" class="bg-white p-6 rounded-lg shadow-md mb-6">
-                <h3 class="text-xl font-bold mb-4">Plano de Mensura</h3>
-                
-                <div class="mb-6">
-                        <div class="flex justify-between items-center mb-3 border-b pb-1">
-        <h4 class="text-lg font-semibold text-gray-700">Carátula</h4>
-        <div class="flex space-x-2">
-            <button class="select-all-btn text-xs bg-green-100 text-green-700 px-2 py-1 rounded hover:bg-green-200" data-target-section="caratula" data-status="listo">Todo Listo</button>
-            <button class="select-all-btn text-xs bg-red-100 text-red-700 px-2 py-1 rounded hover:bg-red-200" data-target-section="caratula" data-status="na">Todo N/A</button>
+            <!-- Client Detail View (hidden by default) -->
+            <div id="client-detail-view" class="hidden mx-auto max-w-3xl">
+                <button id="back-btn" class="mb-4 text-blue-500">&larr; Volver</button>
+                <h2 id="client-name-title" class="text-2xl font-bold mb-4"></h2>
+
+                <!-- Mensura Card -->
+                            <div id="mensura-section" class="bg-white p-6 rounded-lg shadow-md mb-6">
+                    <h3 class="text-xl font-bold mb-4">Plano de Mensura</h3>
+                    
+                    <div class="mb-6">
+                            <div class="flex justify-between items-center mb-3 border-b pb-1">
+            <h4 class="text-lg font-semibold text-gray-700">Carátula</h4>
+            <div class="flex space-x-2">
+                <button class="select-all-btn text-xs bg-green-100 text-green-700 px-2 py-1 rounded hover:bg-green-200" data-target-section="caratula" data-status="listo">Todo Listo</button>
+                <button class="select-all-btn text-xs bg-red-100 text-red-700 px-2 py-1 rounded hover:bg-red-200" data-target-section="caratula" data-status="na">Todo N/A</button>
+            </div>
         </div>
-    </div>
 <div class="flex items-center border-t py-2">
   <span class="text-gray-800">Dato Partida Inmobiliaria (PII)</span>
   <div class="flex items-center space-x-4 flex-shrink-0 ml-auto">
@@ -183,16 +194,16 @@
     </label>
   </div>
 </div>
-                </div>
+                    </div>
 
-                <div class="mb-6">
-                        <div class="flex justify-between items-center mb-3 border-b pb-1">
-        <h4 class="text-lg font-semibold text-gray-700">Dibujo</h4>
-        <div class="flex space-x-2">
-            <button class="select-all-btn text-xs bg-green-100 text-green-700 px-2 py-1 rounded hover:bg-green-200" data-target-section="dibujo" data-status="listo">Todo Listo</button>
-            <button class="select-all-btn text-xs bg-red-100 text-red-700 px-2 py-1 rounded hover:bg-red-200" data-target-section="dibujo" data-status="na">Todo N/A</button>
+                    <div class="mb-6">
+                            <div class="flex justify-between items-center mb-3 border-b pb-1">
+            <h4 class="text-lg font-semibold text-gray-700">Dibujo</h4>
+            <div class="flex space-x-2">
+                <button class="select-all-btn text-xs bg-green-100 text-green-700 px-2 py-1 rounded hover:bg-green-200" data-target-section="dibujo" data-status="listo">Todo Listo</button>
+                <button class="select-all-btn text-xs bg-red-100 text-red-700 px-2 py-1 rounded hover:bg-red-200" data-target-section="dibujo" data-status="na">Todo N/A</button>
+            </div>
         </div>
-    </div>
 <div class="flex items-center border-t py-2">
   <span class="text-gray-800">Datos de linderos</span>
   <div class="flex items-center space-x-4 flex-shrink-0 ml-auto">
@@ -338,17 +349,17 @@
     </label>
   </div>
 </div>
+                    </div>
                 </div>
-            </div>
 
-            <div id="foja-mejoras-section" class="bg-white p-6 rounded-lg shadow-md mb-6">
-                    <div class="flex justify-between items-center mb-4">
-        <h3 class="text-xl font-bold">Foja de Mejoras</h3>
-        <div class="flex space-x-2">
-            <button class="select-all-btn text-xs bg-green-100 text-green-700 px-2 py-1 rounded hover:bg-green-200" data-target-section="foja-mejoras" data-status="listo">Todo Listo</button>
-            <button class="select-all-btn text-xs bg-red-100 text-red-700 px-2 py-1 rounded hover:bg-red-200" data-target-section="foja-mejoras" data-status="na">Todo N/A</button>
+                <div id="foja-mejoras-section" class="bg-white p-6 rounded-lg shadow-md mb-6">
+                        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-bold">Foja de Mejoras</h3>
+            <div class="flex space-x-2">
+                <button class="select-all-btn text-xs bg-green-100 text-green-700 px-2 py-1 rounded hover:bg-green-200" data-target-section="foja-mejoras" data-status="listo">Todo Listo</button>
+                <button class="select-all-btn text-xs bg-red-100 text-red-700 px-2 py-1 rounded hover:bg-red-200" data-target-section="foja-mejoras" data-status="na">Todo N/A</button>
+            </div>
         </div>
-    </div>
 <div class="flex items-center border-t py-2">
   <span class="text-gray-800">Dato Partida Inmobiliaria (PII)</span>
   <div class="flex items-center space-x-4 flex-shrink-0 ml-auto">
@@ -530,15 +541,53 @@
     </label>
   </div>
 </div>
-            </div>
+                </div>
 
-            <!-- Observaciones Card -->
-            <div class="bg-white p-6 rounded-lg shadow-md">
-                <h3 class="text-xl font-bold mb-4">3. Observaciones</h3>
-                <textarea id="observations-textarea" rows="4" class="w-full p-2 border rounded" placeholder="Añadir observaciones..."></textarea>
-            </div>
+                <!-- Observaciones Card -->
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="text-xl font-bold mb-4">3. Observaciones</h3>
+                    <textarea id="observations-textarea" rows="4" class="w-full p-2 border rounded" placeholder="Añadir observaciones..."></textarea>
+                </div>
 
+            </div>
         </div>
+    </div>
+
+    <!-- CONTENEDOR PRINCIPAL PARA LA VISTA DE NOTAS (Oculto) -->
+    <div id="notas-view" class="hidden p-4 sm:p-8 max-w-4xl mx-auto">
+    <h1 class="text-2xl font-bold mb-4">Notas Generales</h1>
+    
+    <!-- Search and Add Controls -->
+    <div class="flex justify-between items-center mb-4">
+        <input type="search" id="search-notas-input" placeholder="Buscar en notas..." class="w-1/2 p-2 border rounded">
+        <button id="add-nota-btn" class="bg-blue-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-600">+ Nueva Nota</button>
+    </div>
+
+    <!-- Notes List Container -->
+    <div id="notas-list-container" class="space-y-4">
+        <!-- Las tarjetas de las notas se insertarán aquí dinámicamente -->
+    </div>
+
+    <!-- Modal para Agregar/Editar Nota (Oculto) -->
+    <div id="nota-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
+        <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md mx-auto">
+            <h2 id="modal-title" class="text-2xl font-bold mb-4">Nueva Nota</h2>
+            <div class="space-y-4">
+                <div>
+                    <label for="modal-nota-titulo" class="block text-sm font-medium text-gray-700">Título</label>
+                    <input type="text" id="modal-nota-titulo" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+                </div>
+                <div>
+                    <label for="modal-nota-contenido" class="block text-sm font-medium text-gray-700">Contenido</label>
+                    <textarea id="modal-nota-contenido" rows="6" class="mt-1 block w-full p-2 border border-gray-300 rounded-md"></textarea>
+                </div>
+            </div>
+            <div class="mt-6 flex justify-end space-x-3">
+                <button id="modal-cancel-btn" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">Cancelar</button>
+                <button id="modal-save-btn" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">Guardar Nota</button>
+            </div>
+        </div>
+    </div>
     </div>
 
     <script type="module" src="./main.js"></script>

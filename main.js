@@ -26,6 +26,19 @@ const backBtn = document.getElementById("back-btn");
 const clientNameTitle = document.getElementById("client-name-title");
 const observationsTextarea = document.getElementById("observations-textarea");
 const addClientBtn = document.getElementById('add-client-btn');
+const tabClientes = document.getElementById("tab-clientes");
+const tabNotas = document.getElementById("tab-notas");
+const clientesView = document.getElementById("clientes-view");
+const notasView = document.getElementById("notas-view");
+const notasListContainer = document.getElementById("notas-list-container");
+const addNotaBtn = document.getElementById("add-nota-btn");
+const searchNotasInput = document.getElementById("search-notas-input");
+const notaModal = document.getElementById("nota-modal");
+const modalTitle = document.getElementById("modal-title");
+const modalNotaTitulo = document.getElementById("modal-nota-titulo");
+const modalNotaContenido = document.getElementById("modal-nota-contenido");
+const modalCancelBtn = document.getElementById("modal-cancel-btn");
+const modalSaveBtn = document.getElementById("modal-save-btn");
 
 function sanitizeKey(key) {
   return key.toLowerCase().replace(/[^a-z0-9_-]/g, '_');
@@ -372,3 +385,206 @@ async function migrateData() {
 // con la página de tu aplicación abierta.
 // migrateData();
 */
+
+// --- LÓGICA DE NAVEGACIÓN POR PESTAÑAS ---
+
+tabClientes.addEventListener("click", () => {
+    // Show clients, hide notes
+    clientesView.classList.remove("hidden");
+    notasView.classList.add("hidden");
+
+    // Update tab styles
+    tabClientes.classList.add("text-blue-500", "border-b-4", "border-blue-500");
+    tabClientes.classList.remove("text-gray-500");
+    tabNotas.classList.remove("text-blue-500", "border-b-4", "border-blue-500");
+    tabNotas.classList.add("text-gray-500");
+});
+
+tabNotas.addEventListener("click", () => {
+    // Show notes, hide clients
+    notasView.classList.remove("hidden");
+    clientesView.classList.add("hidden");
+
+    // Update tab styles
+    tabNotas.classList.add("text-blue-500", "border-b-4", "border-blue-500");
+    tabNotas.classList.remove("text-gray-500");
+    tabClientes.classList.remove("text-blue-500", "border-b-4", "border-blue-500");
+    tabClientes.classList.add("text-gray-500");
+});
+
+// --- LÓGICA DE LA PESTAÑA DE NOTAS ---
+
+onSnapshot(collection(db, 'notas'), (snapshot) => {
+    notasListContainer.innerHTML = ''; // Limpiar la lista actual
+
+    if (snapshot.empty) {
+        notasListContainer.innerHTML = `<p class="text-gray-500 text-center">No hay notas todavía. ¡Crea la primera!</p>`;
+        return;
+    }
+
+    const notes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+    // Opcional: Ordenar las notas por fecha de creación, la más nueva primero
+    notes.sort((a, b) => b.fechaCreacion?.seconds - a.fechaCreacion?.seconds);
+
+    notes.forEach((note, index) => {
+        const noteCard = document.createElement('div');
+        noteCard.className = 'bg-white p-6 rounded-lg shadow-md';
+        noteCard.dataset.id = note.id;
+
+        const title = document.createElement('h3');
+        title.className = 'text-lg font-bold mb-2';
+        title.textContent = `NOTA ${index + 1}: ${note.titulo || 'Sin Título'}`;
+
+        const content = document.createElement('p');
+        content.className = 'text-gray-700 whitespace-pre-wrap'; // Esta clase respeta los saltos de línea
+        content.textContent = note.contenido || '';
+        
+        const actionsContainer = document.createElement('div');
+        actionsContainer.className = 'flex justify-end space-x-3 mt-4';
+
+        const editBtn = document.createElement('button');
+        editBtn.className = 'edit-nota-btn text-sm text-blue-500 hover:underline';
+        editBtn.textContent = 'Editar';
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'delete-nota-btn text-sm text-red-500 hover:underline';
+        deleteBtn.textContent = 'Eliminar';
+
+        actionsContainer.appendChild(editBtn);
+        actionsContainer.appendChild(deleteBtn);
+
+        noteCard.appendChild(title);
+        noteCard.appendChild(content);
+        noteCard.appendChild(actionsContainer);
+
+        notasListContainer.appendChild(noteCard);
+    });
+});
+
+// --- LÓGICA DE LA PESTAÑA DE NOTAS (continuación) ---
+
+// Mostrar el modal para una nueva nota
+addNotaBtn.addEventListener("click", () => {
+    // Resetear el modal para asegurar que está limpio
+    modalTitle.textContent = "Nueva Nota";
+    modalNotaTitulo.value = "";
+    modalNotaContenido.value = "";
+    modalSaveBtn.dataset.mode = "add"; // Poner el modal en modo "añadir"
+    delete modalSaveBtn.dataset.id;     // Quitar cualquier ID de una edición anterior
+    
+    notaModal.classList.remove("hidden");
+});
+
+// Ocultar el modal al hacer clic en "Cancelar"
+modalCancelBtn.addEventListener("click", () => {
+    notaModal.classList.add("hidden");
+});
+
+// Manejar el clic en el botón "Guardar" del modal
+modalSaveBtn.addEventListener("click", async () => {
+    const titulo = modalNotaTitulo.value.trim();
+    const contenido = modalNotaContenido.value.trim();
+
+    if (!titulo) {
+        alert("El título de la nota no puede estar vacío.");
+        return;
+    }
+
+    const mode = modalSaveBtn.dataset.mode;
+    
+    try {
+        if (mode === "add") {
+            // Si estamos en modo "añadir", creamos un nuevo documento
+            await addDoc(collection(db, 'notas'), {
+                titulo: titulo,
+                contenido: contenido,
+                fechaCreacion: serverTimestamp(),
+                fechaActualizacion: serverTimestamp(),
+            });
+        } else if (mode === "edit") {
+            // Si estamos en modo "editar", actualizamos el documento existente
+            const noteId = modalSaveBtn.dataset.id;
+            const docRef = doc(db, "notas", noteId);
+            await updateDoc(docRef, {
+                titulo: titulo,
+                contenido: contenido,
+                fechaActualizacion: serverTimestamp()
+            });
+        }
+        
+        notaModal.classList.add("hidden");
+
+    } catch (e) {
+        console.error("Error al guardar la nota: ", e);
+        alert("Hubo un error al guardar la nota.");
+    }
+});
+
+// --- LÓGICA DE LA PESTAÑA DE NOTAS (continuación) ---
+
+// Listener para acciones dentro de la lista de notas (Eliminar y Editar)
+notasListContainer.addEventListener("click", async (event) => {
+    const target = event.target;
+
+    // --- LÓGICA PARA ELIMINAR ---
+    if (target.classList.contains("delete-nota-btn")) {
+        const noteCard = target.closest("[data-id]");
+        const noteId = noteCard.dataset.id;
+        
+        if (confirm("¿Estás seguro de que quieres eliminar esta nota?")) {
+            try {
+                await deleteDoc(doc(db, "notas", noteId));
+            } catch (e) {
+                console.error("Error al eliminar la nota: ", e);
+            }
+        }
+    }
+
+    // --- AÑADIR NUEVA LÓGICA PARA EDITAR ---
+    if (target.classList.contains("edit-nota-btn")) {
+        const noteCard = target.closest("[data-id]");
+        const noteId = noteCard.dataset.id;
+        
+        const docRef = doc(db, "notas", noteId);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+            const noteData = docSnap.data();
+            // Poblar el modal con los datos de la nota
+            modalTitle.textContent = "Editar Nota";
+            modalNotaTitulo.value = noteData.titulo;
+            modalNotaContenido.value = noteData.contenido;
+
+            // Configurar el modal para el modo "editar"
+            modalSaveBtn.dataset.mode = "edit";
+            modalSaveBtn.dataset.id = noteId; // Adjuntar el ID de la nota al botón
+            
+            // Mostrar el modal
+            notaModal.classList.remove("hidden");
+        }
+    }
+});
+
+// --- LÓGICA DE LA PESTAÑA DE NOTAS (continuación) ---
+
+// Listener para la barra de búsqueda para filtrar notas en tiempo real
+searchNotasInput.addEventListener("input", (event) => {
+    const searchTerm = event.target.value.toLowerCase();
+    const allNoteCards = notasListContainer.querySelectorAll("[data-id]");
+
+    allNoteCards.forEach(card => {
+        const titleElement = card.querySelector("h3");
+        const contentElement = card.querySelector("p");
+
+        const titleText = titleElement.textContent.toLowerCase();
+        const contentText = contentElement.textContent.toLowerCase();
+
+        // Si el término de búsqueda está en el título o en el contenido, muestra la tarjeta. Si no, ocúltala.
+        if (titleText.includes(searchTerm) || contentText.includes(searchTerm)) {
+            card.style.display = "block"; // O 'flex', 'grid', etc., dependiendo del layout del contenedor
+        } else {
+            card.style.display = "none";
+        }
+    });
+});
