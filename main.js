@@ -1,6 +1,6 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.7/firebase-app.js";
-import { getFirestore, collection, onSnapshot, addDoc, serverTimestamp, doc, getDoc, updateDoc, deleteField, deleteDoc } from "https://www.gstatic.com/firebasejs/9.6.7/firebase-firestore.js";
+import { getFirestore, collection, onSnapshot, addDoc, serverTimestamp, doc, getDoc, updateDoc, deleteField, deleteDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/9.6.7/firebase-firestore.js";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -79,13 +79,19 @@ async function loadClientDetails(clientId) {
                 const sectionContainer = radio.closest('[id$="-section"]');
                 if (!sectionContainer) return;
 
-                const section = sectionContainer.id.replace("-section", "");
-                const key = radio.name.replace("-status", "");
+                let sectionDB;
+                if (sectionContainer.id === 'foja-mejoras-section') {
+                    sectionDB = 'fojaMejoras';
+                } else {
+                    sectionDB = 'mensura';
+                }
+
+                const key = radio.name.replace(/^(mensura-|fojamejoras-)/, "").replace("-status", "");
                 const sanitizedKey = sanitizeKey(key);
                 
                 let savedState = null;
-                if (clientData[section] && clientData[section][sanitizedKey]) {
-                    savedState = clientData[section][sanitizedKey];
+                if (clientData[sectionDB] && clientData[sectionDB][sanitizedKey]) {
+                    savedState = clientData[sectionDB][sanitizedKey];
                 }
                 
                 radio.checked = (radio.value === savedState);
@@ -141,43 +147,114 @@ backBtn.addEventListener("click", () => {
 });
 
 clientDetailView.addEventListener("click", async (event) => {
-        const target = event.target;
-        if (target.type !== "radio") return;
-
-        const sectionContainer = target.closest('[id$="-section"]');
-        if (!sectionContainer) return;
+    const selectAllButton = event.target.closest(".select-all-btn");
+    if (selectAllButton) {
+        const sectionIdentifier = selectAllButton.dataset.targetSection;
+        const statusToSet = selectAllButton.dataset.status;
         
-        const wasChecked = target.getAttribute("data-was-checked") === "true";
-        
-        document.querySelectorAll(`input[name="${target.name}"]`).forEach(radio => {
-            radio.removeAttribute("data-was-checked");
-        });
-
-        const section = sectionContainer.id.replace("-section", "");
-        const key = target.name.replace("-status", "");
-        const sanitizedKey = sanitizeKey(key);
-        const docRef = doc(db, "clientes", currentClientId);
-
-        if (wasChecked) {
-            target.checked = false;
-            try {
-                await updateDoc(docRef, {
-                    [`${section}.${sanitizedKey}`]: deleteField()
-                });
-            } catch (e) {
-                console.error("Error removing field: ", e);
-            }
+        let container;
+        if (sectionIdentifier === "foja-mejoras") {
+            container = document.getElementById("foja-mejoras-section");
         } else {
-            target.setAttribute("data-was-checked", "true");
-            try {
-                await updateDoc(docRef, {
-                    [`${section}.${sanitizedKey}`]: target.value
-                });
-            } catch (e) {
-                console.error("Error updating field: ", e);
+            const allSubSectionTitles = document.querySelectorAll("#mensura-section h4");
+            for (const titleElement of allSubSectionTitles) {
+                // FIX: Normalize text and remove diacritics for comparison
+                const normalizedText = titleElement.textContent.trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+                if (normalizedText === sectionIdentifier) {
+                    container = titleElement.parentElement.parentElement;
+                    break;
+                }
             }
         }
+        if (!container) {
+            console.error("Could not find container for section:", sectionIdentifier);
+            return;
+        }
+
+        const allRadiosInSection = container.querySelectorAll("input[type=radio]");
+        const updates = {};
+        
+        let sectionDB;
+        if (container.id === 'foja-mejoras-section') {
+            sectionDB = 'fojaMejoras';
+        } else {
+            sectionDB = 'mensura';
+        }
+
+        allRadiosInSection.forEach(radio => {
+            const key = radio.name.replace(/^(mensura-|fojamejoras-)/, "").replace("-status", "");
+            const sanitizedKey = sanitizeKey(key);
+            
+            if (radio.value === statusToSet) {
+                radio.checked = true;
+                radio.setAttribute("data-was-checked", "true");
+                updates[`${sectionDB}.${sanitizedKey}`] = statusToSet;
+            } else {
+                radio.checked = false;
+                radio.removeAttribute("data-was-checked");
+            }
+        });
+        
+        if (Object.keys(updates).length === 0) {
+            console.warn("No updates to send for section:", sectionIdentifier);
+            return;
+        }
+
+        try {
+            console.log("Updating Firestore for section:", sectionDB, "with data:", updates);
+            const docRef = doc(db, "clientes", currentClientId);
+            await updateDoc(docRef, updates);
+            console.log("Firestore update successful for section:", sectionDB);
+        } catch (e) {
+            console.error("Error updating full section:", e);
+        }
+        return;
+    }
+
+    const target = event.target;
+    if (target.type !== "radio") return;
+
+    const sectionContainer = target.closest('[id$="-section"]');
+    if (!sectionContainer) return;
+    
+    // FIX: Correctly identify the section for Firestore
+    let sectionDB;
+    if (sectionContainer.id === 'foja-mejoras-section') {
+        sectionDB = 'fojaMejoras';
+    } else {
+        sectionDB = 'mensura';
+    }
+    
+    const wasChecked = target.getAttribute("data-was-checked") === "true";
+    
+    document.querySelectorAll(`input[name="${target.name}"]`).forEach(radio => {
+        radio.removeAttribute("data-was-checked");
     });
+
+    const key = target.name.replace(/^(mensura-|fojamejoras-)/, "").replace("-status", "");
+    const sanitizedKey = sanitizeKey(key);
+    const docRef = doc(db, "clientes", currentClientId);
+
+    if (wasChecked) {
+        target.checked = false;
+        try {
+            await updateDoc(docRef, {
+                [`${sectionDB}.${sanitizedKey}`]: deleteField()
+            });
+        } catch (e) {
+            console.error("Error removing field: ", e);
+        }
+    } else {
+        target.setAttribute("data-was-checked", "true");
+        try {
+            await updateDoc(docRef, {
+                [`${sectionDB}.${sanitizedKey}`]: target.value
+            });
+        } catch (e) {
+            console.error("Error updating field: ", e);
+        }
+    }
+});
 
 observationsTextarea.addEventListener("input", () => {
     clearTimeout(debounceTimer);
@@ -197,20 +274,39 @@ observationsTextarea.addEventListener("input", () => {
 });
 
 addClientBtn.addEventListener('click', async () => {
-  const clientName = prompt('Ingrese el nombre del nuevo cliente:');
-  if (clientName && clientName.trim() !== '') {
-    try {
-      await addDoc(collection(db, 'clientes'), {
-        nombre: clientName.trim(),
-        createdAt: serverTimestamp()
-      });
-      console.log('Cliente agregado con éxito.');
-    } catch (e) {
-      console.error('Error al agregar el cliente: ', e);
-      alert('Hubo un error al agregar el cliente.');
-    }
-  }
-});
+        const clientName = prompt('Ingrese el nombre del nuevo cliente:');
+        
+        if (!clientName || clientName.trim() === '') {
+            return; // Exit if the user cancels or enters an empty name
+        }
+
+        const trimmedName = clientName.trim();
+
+        try {
+            // Check if a client with the same name already exists
+            const q = query(collection(db, "clientes"), where("nombre", "==", trimmedName));
+            const querySnapshot = await getDocs(q);
+
+            if (!querySnapshot.empty) {
+                alert(`Error: Ya existe un cliente con el nombre "${trimmedName}".`);
+                return; // Stop the function if a duplicate is found
+            }
+
+            // If no duplicate is found, proceed to add the new client
+            await addDoc(collection(db, 'clientes'), {
+                nombre: trimmedName,
+                fechaCreacion: serverTimestamp(),
+                observaciones: '',
+                mensura: {}, 
+                fojaMejoras: {}
+            });
+            console.log('Cliente agregado con éxito.');
+
+        } catch (e) {
+            console.error('Error al agregar el cliente: ', e);
+            alert('Hubo un error al verificar o agregar el cliente.');
+        }
+    });
 
 /*
 // --- SCRIPT DE MIGRACIÓN DE DATOS ---
