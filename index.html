@@ -7,12 +7,40 @@
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100">
+    <!-- VISTA DE INICIO DE SESIÓN -->
+    <div id="login-view" class="fixed inset-0 bg-gray-100 flex items-center justify-center z-50">
+        <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-sm">
+            <h2 class="text-2xl font-bold mb-6 text-center">Iniciar Sesión</h2>
+            <div class="space-y-4">
+                <div>
+                    <label for="login-email" class="block text-sm font-medium text-gray-700">Email</label>
+                    <input type="email" id="login-email" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+                </div>
+                <div>
+                    <label for="login-password" class="block text-sm font-medium text-gray-700">Contraseña</label>
+                    <div class="relative">
+                        <input type="password" id="login-password" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
+                        <button id="toggle-password-btn" class="absolute inset-y-0 right-0 px-3 flex items-center text-gray-500">
+                            <!-- SVG del Ojo Cerrado (se añadirá con JS) -->
+                        </button>
+                    </div>
+                </div>
+                <p id="login-error-msg" class="text-red-500 text-sm hidden"></p>
+                <button id="login-btn" class="w-full bg-blue-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-600">Entrar</button>
+            </div>
+        </div>
+    </div>
+    <div id="main-app-container" class="hidden">
     <!-- NAVEGACIÓN PRINCIPAL POR PESTAÑAS -->
     <nav class="bg-white shadow-md">
-        <div class="max-w-4xl mx-auto px-4">
+        <div class="max-w-4xl mx-auto px-4 flex justify-between items-center">
             <div class="flex justify-start space-x-4">
                 <button id="tab-clientes" class="py-4 px-2 text-blue-500 border-b-4 border-blue-500 font-semibold">Clientes</button>
                 <button id="tab-notas" class="py-4 px-2 text-gray-500 font-semibold hover:text-blue-500">Notas Generales</button>
+            </div>
+            <div id="user-session-view" class="hidden flex items-center space-x-4 ml-auto">
+                <span id="user-email-display" class="text-sm text-gray-600"></span>
+                <button id="logout-btn" class="text-sm bg-red-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-600">Cerrar Sesión</button>
             </div>
         </div>
     </nav>
@@ -587,6 +615,7 @@
                 <button id="modal-save-btn" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">Guardar Nota</button>
             </div>
         </div>
+    </div>
     </div>
     </div>
 

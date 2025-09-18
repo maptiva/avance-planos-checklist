@@ -1,6 +1,7 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.7/firebase-app.js";
 import { getFirestore, collection, onSnapshot, addDoc, serverTimestamp, doc, getDoc, updateDoc, deleteField, deleteDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/9.6.7/firebase-firestore.js";
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/9.6.7/firebase-auth.js";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -15,6 +16,7 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth(app);
 
 let currentClientId = null;
 let debounceTimer;
@@ -39,6 +41,17 @@ const modalNotaTitulo = document.getElementById("modal-nota-titulo");
 const modalNotaContenido = document.getElementById("modal-nota-contenido");
 const modalCancelBtn = document.getElementById("modal-cancel-btn");
 const modalSaveBtn = document.getElementById("modal-save-btn");
+
+const mainAppContainer = document.getElementById("main-app-container");
+const loginView = document.getElementById("login-view");
+const loginEmail = document.getElementById("login-email");
+const loginPassword = document.getElementById("login-password");
+const togglePasswordBtn = document.getElementById("toggle-password-btn");
+const loginErrorMsg = document.getElementById("login-error-msg");
+const loginBtn = document.getElementById("login-btn");
+const userSessionView = document.getElementById("user-session-view");
+const userEmailDisplay = document.getElementById("user-email-display");
+const logoutBtn = document.getElementById("logout-btn");
 
 function sanitizeKey(key) {
   return key.toLowerCase().replace(/[^a-z0-9_-]/g, '_');
@@ -385,6 +398,64 @@ async function migrateData() {
 // con la página de tu aplicación abierta.
 // migrateData();
 */
+
+// --- LÓGICA DE AUTENTICACIÓN ---
+
+// SVG para los iconos del ojo
+const eyeIcon = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z" /><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.022 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" /></svg>`;
+const eyeOffIcon = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.512 1.074l-1.78-1.781zm4.261 4.26l1.514 1.515a2.003 2.003 0 012.45 2.45l1.514 1.514a4 4 0 00-5.478-5.478z" clip-rule="evenodd" /><path d="M12.454 16.697L9.75 13.992a4 4 0 01-3.742-3.742L2.335 6.578A10.025 10.025 0 01.458 10c1.274 4.057 5.022 7 9.542 7 1.127 0 2.216-.23 3.22-.635z" /></svg>`;
+
+togglePasswordBtn.innerHTML = eyeOffIcon; // Start with eye closed
+
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        // Usuario ha iniciado sesión
+        console.log("Usuario conectado:", user.email);
+        mainAppContainer.classList.remove("hidden");
+        loginView.classList.add("hidden");
+        userSessionView.classList.remove("hidden");
+        userEmailDisplay.textContent = user.email;
+    } else {
+        // Usuario ha cerrado sesión
+        console.log("Ningún usuario conectado.");
+        mainAppContainer.classList.add("hidden");
+        loginView.classList.remove("hidden");
+        userSessionView.classList.add("hidden");
+        userEmailDisplay.textContent = "";
+    }
+});
+
+loginBtn.addEventListener("click", () => {
+    const email = loginEmail.value;
+    const password = loginPassword.value;
+    loginErrorMsg.classList.add("hidden");
+
+    signInWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+            // Login exitoso, onAuthStateChanged se encargará del resto
+        })
+        .catch((error) => {
+            console.error("Error de login:", error.code, error.message);
+            loginErrorMsg.textContent = "Email o contraseña incorrectos.";
+            loginErrorMsg.classList.remove("hidden");
+        });
+});
+
+logoutBtn.addEventListener("click", () => {
+    signOut(auth).catch((error) => {
+        console.error("Error al cerrar sesión:", error);
+    });
+});
+
+togglePasswordBtn.addEventListener("click", () => {
+    if (loginPassword.type === "password") {
+        loginPassword.type = "text";
+        togglePasswordBtn.innerHTML = eyeIcon;
+    } else {
+        loginPassword.type = "password";
+        togglePasswordBtn.innerHTML = eyeOffIcon;
+    }
+});
 
 // --- LÓGICA DE NAVEGACIÓN POR PESTAÑAS ---
 
