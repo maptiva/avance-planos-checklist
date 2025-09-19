@@ -7,8 +7,13 @@
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100">
+    <!-- VISTA DE CARGA INICIAL -->
+    <div id="loading-view" class="flex items-center justify-center h-screen">
+        <p class="text-xl text-gray-500">Cargando aplicación...</p>
+    </div>
+
     <!-- VISTA DE INICIO DE SESIÓN -->
-    <div id="login-view" class="fixed inset-0 bg-gray-100 flex items-center justify-center z-50">
+    <div id="login-view" class="hidden fixed inset-0 bg-gray-100 flex items-center justify-center z-50">
         <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-sm">
             <h2 class="text-2xl font-bold mb-6 text-center">Iniciar Sesión</h2>
             <div class="space-y-4">

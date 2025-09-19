@@ -54,6 +54,7 @@ const loginBtn = document.getElementById("login-btn");
 const userSessionView = document.getElementById("user-session-view");
 const userEmailDisplay = document.getElementById("user-email-display");
 const logoutBtn = document.getElementById("logout-btn");
+const loadingView = document.getElementById("loading-view");
 
 function sanitizeKey(key) {
   return key.toLowerCase().replace(/[^a-z0-9_-]/g, '_');
@@ -107,8 +108,8 @@ function initializeAppDataListeners() {
 
         const notes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-        // Opcional: Ordenar las notas por fecha de creación, la más nueva primero
-        notes.sort((a, b) => b.fechaCreacion?.seconds - a.fechaCreacion?.seconds);
+        // Ordenar las notas por fecha de creación, la más antigua primero
+        notes.sort((a, b) => a.fechaCreacion?.seconds - b.fechaCreacion?.seconds);
 
         notes.forEach((note, index) => {
             const noteCard = document.createElement('div');
@@ -479,21 +480,29 @@ togglePasswordBtn.innerHTML = eyeOffIcon; // Start with eye closed
 onAuthStateChanged(auth, (user) => {
     if (user) {
         // Usuario ha iniciado sesión
-        mainAppContainer.classList.remove("hidden");
+        loadingView.classList.add("hidden");
         loginView.classList.add("hidden");
+        mainAppContainer.classList.remove("hidden");
         userSessionView.classList.remove("hidden");
         userEmailDisplay.textContent = user.email;
-
-        // ¡PUNTO CLAVE! Iniciar los listeners de datos SOLO DESPUÉS de confirmar el usuario.
+        
         initializeAppDataListeners();
+
+        // Cargar la última pestaña activa guardada
+        const lastTab = localStorage.getItem('lastActiveTab');
+        if (lastTab === 'notas') {
+            tabNotas.click();
+        } else {
+            tabClientes.click(); // Por defecto a clientes
+        }
 
     } else {
         // Usuario ha cerrado sesión
+        loadingView.classList.add("hidden");
         mainAppContainer.classList.add("hidden");
         loginView.classList.remove("hidden");
         userSessionView.classList.add("hidden");
-
-        // ¡PUNTO CLAVE! Detener los listeners para no causar errores de permisos.
+        
         detachDataListeners();
     }
 });
@@ -544,27 +553,25 @@ togglePasswordBtn.addEventListener("click", () => {
 // --- LÓGICA DE NAVEGACIÓN POR PESTAÑAS ---
 
 tabClientes.addEventListener("click", () => {
-    // Show clients, hide notes
     clientesView.classList.remove("hidden");
     notasView.classList.add("hidden");
-
-    // Update tab styles
     tabClientes.classList.add("text-blue-500", "border-b-4", "border-blue-500");
     tabClientes.classList.remove("text-gray-500");
     tabNotas.classList.remove("text-blue-500", "border-b-4", "border-blue-500");
     tabNotas.classList.add("text-gray-500");
+    // Guardar la pestaña activa
+    localStorage.setItem('lastActiveTab', 'clientes');
 });
 
 tabNotas.addEventListener("click", () => {
-    // Show notes, hide clients
     notasView.classList.remove("hidden");
     clientesView.classList.add("hidden");
-
-    // Update tab styles
     tabNotas.classList.add("text-blue-500", "border-b-4", "border-blue-500");
     tabNotas.classList.remove("text-gray-500");
     tabClientes.classList.remove("text-blue-500", "border-b-4", "border-blue-500");
     tabClientes.classList.add("text-gray-500");
+    // Guardar la pestaña activa
+    localStorage.setItem('lastActiveTab', 'notas');
 });
 
 // --- LÓGICA DE LA PESTAÑA DE NOTAS ---
