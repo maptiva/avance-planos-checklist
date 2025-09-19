@@ -20,6 +20,8 @@ const auth = getAuth(app);
 
 let currentClientId = null;
 let debounceTimer;
+let clientesListener = null;
+let notasListener = null;
 
 const clientListContainer = document.getElementById('client-list-container');
 const clientListView = document.getElementById("client-list-view");
@@ -57,37 +59,104 @@ function sanitizeKey(key) {
   return key.toLowerCase().replace(/[^a-z0-9_-]/g, '_');
 }
 
-// Listen for real-time updates on the 'clientes' collection
-onSnapshot(collection(db, 'clientes'), (snapshot) => {
-  // Clear the current list
-  clientListContainer.innerHTML = '';
-  // Check if the collection is empty
-  if (snapshot.empty) {
-    clientListContainer.innerHTML = `<p class="text-gray-500">No hay clientes todavía. ¡Agrega uno nuevo!</p>`;
-    return;
-  }
-  // Create and append a card for each client
-  snapshot.forEach(doc => {
-          const client = doc.data();
-          const clientCard = document.createElement("div");
-          clientCard.className = "bg-white p-4 rounded-lg shadow-md w-full flex justify-between items-center";
-                    
-          const clientNameSpan = document.createElement("span");
-          clientNameSpan.className = "cursor-pointer flex-grow font-bold";
-          clientNameSpan.textContent = client.nombre;
-          clientNameSpan.dataset.id = doc.id; // The name is the main clickable area
-                    
-          const deleteBtn = document.createElement("button");
-          deleteBtn.className = "delete-client-btn ml-4 p-1 rounded-full hover:bg-red-100";
-          deleteBtn.dataset.id = doc.id; // The button also needs the id
-          deleteBtn.dataset.name = client.nombre; // Store name for confirmation message
-          deleteBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" /></svg>`; // Trash can icon
+function initializeAppDataListeners() {
+    // Detener listeners anteriores si existen, para evitar duplicados
+    if (clientesListener) clientesListener();
+    if (notasListener) notasListener();
 
-          clientCard.appendChild(clientNameSpan);
-          clientCard.appendChild(deleteBtn);
-          clientListContainer.appendChild(clientCard);
-      });
-});
+    // Iniciar listener para la colección 'clientes'
+    clientesListener = onSnapshot(collection(db, 'clientes'), (snapshot) => {
+        // Clear the current list
+        clientListContainer.innerHTML = '';
+        // Check if the collection is empty
+        if (snapshot.empty) {
+            clientListContainer.innerHTML = `<p class="text-gray-500">No hay clientes todavía. ¡Agrega uno nuevo!</p>`;
+            return;
+        }
+        // Create and append a card for each client
+        snapshot.forEach(doc => {
+            const client = doc.data();
+            const clientCard = document.createElement("div");
+            clientCard.className = "bg-white p-4 rounded-lg shadow-md w-full flex justify-between items-center";
+                    
+            const clientNameSpan = document.createElement("span");
+            clientNameSpan.className = "cursor-pointer flex-grow font-bold";
+            clientNameSpan.textContent = client.nombre;
+            clientNameSpan.dataset.id = doc.id; // The name is the main clickable area
+                    
+            const deleteBtn = document.createElement("button");
+            deleteBtn.className = "delete-client-btn ml-4 p-1 rounded-full hover:bg-red-100";
+            deleteBtn.dataset.id = doc.id; // The button also needs the id
+            deleteBtn.dataset.name = client.nombre; // Store name for confirmation message
+            deleteBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" /></svg>`; // Trash can icon
+
+            clientCard.appendChild(clientNameSpan);
+            clientCard.appendChild(deleteBtn);
+            clientListContainer.appendChild(clientCard);
+        });
+    });
+
+    // Iniciar listener para la colección 'notas'
+    notasListener = onSnapshot(collection(db, 'notas'), (snapshot) => {
+        notasListContainer.innerHTML = ''; // Limpiar la lista actual
+
+        if (snapshot.empty) {
+            notasListContainer.innerHTML = `<p class="text-gray-500 text-center">No hay notas todavía. ¡Crea la primera!</p>`;
+            return;
+        }
+
+        const notes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+        // Opcional: Ordenar las notas por fecha de creación, la más nueva primero
+        notes.sort((a, b) => b.fechaCreacion?.seconds - a.fechaCreacion?.seconds);
+
+        notes.forEach((note, index) => {
+            const noteCard = document.createElement('div');
+            noteCard.className = 'bg-white p-6 rounded-lg shadow-md';
+            noteCard.dataset.id = note.id;
+
+            const title = document.createElement('h3');
+            title.className = 'text-lg font-bold mb-2';
+            title.textContent = `NOTA ${index + 1}: ${note.titulo || 'Sin Título'}`;
+
+            const content = document.createElement('p');
+            content.className = 'text-gray-700 whitespace-pre-wrap'; // Esta clase respeta los saltos de línea
+            content.textContent = note.contenido || '';
+            
+            const actionsContainer = document.createElement('div');
+            actionsContainer.className = 'flex justify-end space-x-3 mt-4';
+
+            const editBtn = document.createElement('button');
+            editBtn.className = 'edit-nota-btn p-1 rounded-full hover:bg-blue-100';
+            editBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" viewBox="0 0 20 20" fill="currentColor"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" /><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" /></svg>`;
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'delete-nota-btn ml-4 p-1 rounded-full hover:bg-red-100';
+            deleteBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" /></svg>`;
+
+            actionsContainer.appendChild(editBtn);
+            actionsContainer.appendChild(deleteBtn);
+
+            noteCard.appendChild(title);
+            noteCard.appendChild(content);
+            noteCard.appendChild(actionsContainer);
+
+            notasListContainer.appendChild(noteCard);
+        });
+    });
+}
+
+function detachDataListeners() {
+    if (clientesListener) {
+        clientesListener(); // Llama a la función de desuscripción
+        clientesListener = null;
+    }
+    if (notasListener) {
+        notasListener(); // Llama a la función de desuscripción
+        notasListener = null;
+    }
+    console.log("Listeners de datos detenidos.");
+}
 
 async function loadClientDetails(clientId) {
         const docRef = doc(db, "clientes", clientId);
@@ -410,18 +479,22 @@ togglePasswordBtn.innerHTML = eyeOffIcon; // Start with eye closed
 onAuthStateChanged(auth, (user) => {
     if (user) {
         // Usuario ha iniciado sesión
-        console.log("Usuario conectado:", user.email);
         mainAppContainer.classList.remove("hidden");
         loginView.classList.add("hidden");
         userSessionView.classList.remove("hidden");
         userEmailDisplay.textContent = user.email;
+
+        // ¡PUNTO CLAVE! Iniciar los listeners de datos SOLO DESPUÉS de confirmar el usuario.
+        initializeAppDataListeners();
+
     } else {
         // Usuario ha cerrado sesión
-        console.log("Ningún usuario conectado.");
         mainAppContainer.classList.add("hidden");
         loginView.classList.remove("hidden");
         userSessionView.classList.add("hidden");
-        userEmailDisplay.textContent = "";
+
+        // ¡PUNTO CLAVE! Detener los listeners para no causar errores de permisos.
+        detachDataListeners();
     }
 });
 
@@ -440,6 +513,17 @@ loginBtn.addEventListener("click", () => {
             loginErrorMsg.classList.remove("hidden");
         });
 });
+
+// Habilitar inicio de sesión con la tecla Enter
+const handleLoginOnEnter = (event) => {
+    if (event.key === "Enter") {
+        event.preventDefault();
+        loginBtn.click();
+    }
+};
+
+loginEmail.addEventListener("keyup", handleLoginOnEnter);
+loginPassword.addEventListener("keyup", handleLoginOnEnter);
 
 logoutBtn.addEventListener("click", () => {
     signOut(auth).catch((error) => {
@@ -484,54 +568,6 @@ tabNotas.addEventListener("click", () => {
 });
 
 // --- LÓGICA DE LA PESTAÑA DE NOTAS ---
-
-onSnapshot(collection(db, 'notas'), (snapshot) => {
-    notasListContainer.innerHTML = ''; // Limpiar la lista actual
-
-    if (snapshot.empty) {
-        notasListContainer.innerHTML = `<p class="text-gray-500 text-center">No hay notas todavía. ¡Crea la primera!</p>`;
-        return;
-    }
-
-    const notes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-    // Opcional: Ordenar las notas por fecha de creación, la más nueva primero
-    notes.sort((a, b) => b.fechaCreacion?.seconds - a.fechaCreacion?.seconds);
-
-    notes.forEach((note, index) => {
-        const noteCard = document.createElement('div');
-        noteCard.className = 'bg-white p-6 rounded-lg shadow-md';
-        noteCard.dataset.id = note.id;
-
-        const title = document.createElement('h3');
-        title.className = 'text-lg font-bold mb-2';
-        title.textContent = `NOTA ${index + 1}: ${note.titulo || 'Sin Título'}`;
-
-        const content = document.createElement('p');
-        content.className = 'text-gray-700 whitespace-pre-wrap'; // Esta clase respeta los saltos de línea
-        content.textContent = note.contenido || '';
-        
-        const actionsContainer = document.createElement('div');
-        actionsContainer.className = 'flex justify-end space-x-3 mt-4';
-
-        const editBtn = document.createElement('button');
-        editBtn.className = 'edit-nota-btn p-1 rounded-full hover:bg-blue-100';
-        editBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" viewBox="0 0 20 20" fill="currentColor"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" /><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" /></svg>`;
-
-        const deleteBtn = document.createElement('button');
-        deleteBtn.className = 'delete-nota-btn ml-4 p-1 rounded-full hover:bg-red-100';
-        deleteBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" /></svg>`;
-
-        actionsContainer.appendChild(editBtn);
-        actionsContainer.appendChild(deleteBtn);
-
-        noteCard.appendChild(title);
-        noteCard.appendChild(content);
-        noteCard.appendChild(actionsContainer);
-
-        notasListContainer.appendChild(noteCard);
-    });
-});
 
 // --- LÓGICA DE LA PESTAÑA DE NOTAS (continuación) ---
 
@@ -599,7 +635,8 @@ notasListContainer.addEventListener("click", async (event) => {
     const target = event.target;
 
     // --- LÓGICA PARA ELIMINAR ---
-    if (target.classList.contains("delete-nota-btn")) {
+    const deleteNotaBtn = target.closest('.delete-nota-btn');
+    if (deleteNotaBtn) {
         const noteCard = target.closest("[data-id]");
         const noteId = noteCard.dataset.id;
         
@@ -613,7 +650,8 @@ notasListContainer.addEventListener("click", async (event) => {
     }
 
     // --- AÑADIR NUEVA LÓGICA PARA EDITAR ---
-    if (target.classList.contains("edit-nota-btn")) {
+    const editNotaBtn = target.closest('.edit-nota-btn');
+    if (editNotaBtn) {
         const noteCard = target.closest("[data-id]");
         const noteId = noteCard.dataset.id;
         
